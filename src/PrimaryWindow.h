@@ -46,6 +46,13 @@ class PrimaryWindow : public ASKWindow
 private:
 
 	// your game variables here
+	bool playerShotAlive_;
+    float playerShotX_;
+    float playerShotY_;
+    float playerShotDY_;
+    int playerShotRadius_;
+    int playerShotColor_;
+
 	int playerX_;
     int playerY_;
     int playerWidth_;
@@ -61,6 +68,9 @@ private:
     int ballColor_;
 
 	// your game methods here
+	void UpdatePlayerShot();
+    void RenderPlayerShot();
+
 	void UpdatePlayer();
     void RenderPlayer();
 

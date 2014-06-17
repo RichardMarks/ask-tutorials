@@ -48,6 +48,7 @@ bool PrimaryWindow::UpdateFrame()
 	// update stuff here
 	this->UpdateBall();
 	this->UpdatePlayer();
+	this->UpdatePlayerShot();
 
 	return ASKWindow::UpdateFrame();
 }
@@ -59,6 +60,7 @@ void PrimaryWindow::RenderFrame()
 	// draw here
 	this->RenderBall();
 	this->RenderPlayer();
+	this->RenderPlayerShot();
 
 	ASKWindow::RenderFrame();
 }
@@ -93,6 +95,25 @@ bool PrimaryWindow::LoadContent()
 
     // the player moves at 1/3 of its width
     playerSpeed_ = playerWidth_ / 3;
+
+    // the shot is dead by default
+    playerShotAlive_ = false;
+
+    // the player's shots have a 4 pixel radius
+    playerShotRadius_ = 4;
+
+    // the player fires cyan shots
+    playerShotColor_ = makecol(0, 255, 255);
+
+    // position the shot at the top-center of the player's ship
+    playerShotX_ = playerX_ + (playerWidth_ / 2);
+
+    // reset its Y position to the top of the player
+    playerShotY_ = (float)(playerY_ - playerShotRadius_);
+
+    // shot velocity is set once
+    // all shots are fired at 20 pixels per frame
+    playerShotDY_ = 20.0f;
 
 	return ASKWindow::LoadContent();
 }
@@ -142,6 +163,16 @@ void PrimaryWindow::UpdatePlayer()
 		playerX_ += playerSpeed_;
 	}
 
+	// NEW
+    // the player is limited to firing a single shot at a time.
+    // if the space bar is pressed and the shot is currently dead
+    if (key[KEY_SPACE] && (!playerShotAlive_))
+    {
+        // fire a shot by making it alive
+        playerShotAlive_ = true;
+    }
+    //
+
 	// ensure that the player hasn't gone off screen
 	int xMax = SCREEN_W - playerWidth_;
 	if (playerX_ < 0)
@@ -186,4 +217,44 @@ void PrimaryWindow::RenderPlayer()
 		playerX_, playerBottom,
 		playerX_ + (playerWidth_ / 2), playerY_,
 		playerX_ + playerWidth_, playerBottom, playerColor_);
+}
+
+void PrimaryWindow::UpdatePlayerShot()
+{
+	// if the shot is not alive, then we move it to match
+	// the player's X center position
+	if (!playerShotAlive_)
+	{
+		playerShotX_ = playerX_ + (playerWidth_ / 2);
+	}
+	else
+	// if the shot is alive, we move it along the Y axis
+	{
+		playerShotY_ -= playerShotDY_;
+
+		// if the shot moves off the top of the screen
+		if (playerShotY_ <  -playerShotRadius_)
+		{
+			// kill the shot
+			playerShotAlive_ = false;
+
+			// reset its position to the top of the player
+			playerShotX_ = playerX_ + (playerWidth_ / 2);
+			playerShotY_ = playerY_ - playerShotRadius_;
+		}
+	}
+}
+
+void PrimaryWindow::RenderPlayerShot()
+{
+	// exit the function if the shot is dead
+	if (!playerShotAlive_)
+	{
+		return;
+	}
+
+	// draw the shot
+	circlefill(_backBuffer,
+		(int)playerShotX_, (int)playerShotY_,
+		playerShotRadius_, playerShotColor_);
 }

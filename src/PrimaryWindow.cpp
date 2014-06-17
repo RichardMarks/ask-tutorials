@@ -47,6 +47,7 @@ bool PrimaryWindow::UpdateFrame()
 {
 	// update stuff here
 	this->UpdateBall();
+	this->UpdatePlayer();
 
 	return ASKWindow::UpdateFrame();
 }
@@ -57,6 +58,7 @@ void PrimaryWindow::RenderFrame()
 
 	// draw here
 	this->RenderBall();
+	this->RenderPlayer();
 
 	ASKWindow::RenderFrame();
 }
@@ -77,6 +79,20 @@ bool PrimaryWindow::LoadContent()
     // the ball starts on a random trajectory
     ballDX_ = (float)4+(rand()%8);
     ballDY_ = (float)4+(rand()%8);
+
+    // the player is 32 pixels wide by 64 pixels tall
+    playerWidth_ = 32;
+    playerHeight_ = 64;
+
+    // the player is at the bottom center of the screen
+    playerX_ = SCREEN_W / 2 - playerWidth_ / 2;
+    playerY_ = SCREEN_H - playerHeight_;
+
+    // the player is green
+    playerColor_ = makecol(0, 255, 0);
+
+    // the player moves at 1/3 of its width
+    playerSpeed_ = playerWidth_ / 3;
 
 	return ASKWindow::LoadContent();
 }
@@ -109,4 +125,65 @@ void PrimaryWindow::UpdateBall()
 void PrimaryWindow::RenderBall()
 {
 	circlefill(_backBuffer, (int)ballX_, (int)ballY_, ballRadius_, ballColor_);
+}
+
+void PrimaryWindow::UpdatePlayer()
+{
+	// if the left arrow key is down
+	if (key[KEY_LEFT])
+	{
+		// move left
+		playerX_ -= playerSpeed_;
+	}
+	// if the right arrow key is down
+	else if (key[KEY_RIGHT])
+	{
+		// move right
+		playerX_ += playerSpeed_;
+	}
+
+	// ensure that the player hasn't gone off screen
+	int xMax = SCREEN_W - playerWidth_;
+	if (playerX_ < 0)
+	{
+		playerX_ = 0;
+	}
+	else if (playerX_ > xMax)
+	{
+		playerX_ = xMax;
+	}
+}
+
+void PrimaryWindow::RenderPlayer()
+{
+	// we draw the player as a filled triangle
+
+	/*
+		The player is defined by a position and a size:
+		x,y,w,h
+
+		The triangle's 3 points are
+
+		x,y
+		o----2----o
+		|   / \   |
+		|  /   \  |
+		| /     \ |
+		|/       \|
+		1---------3x+w,y+h
+
+		So, point 1 is at x, y+h
+		point 2 is at x+(w/2),y and
+		point 3 is at x+w,y+h
+	*/
+
+	// we calculate the bottom once and save the value
+	// because it will be used twice. a tiny optimization
+	// that reduces the number of calculations needed.
+	int playerBottom = playerY_ + playerHeight_;
+
+	triangle(_backBuffer,
+		playerX_, playerBottom,
+		playerX_ + (playerWidth_ / 2), playerY_,
+		playerX_ + playerWidth_, playerBottom, playerColor_);
 }

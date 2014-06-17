@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1269544020 source:/home/user/Projects/ASKScroller/src/AllegroStarterKit.cpp
+1403048133 source:/home/user/Projects/ASKScroller/src/AllegroStarterKit.cpp
 	"AllegroStarterKit.h"
 	<cstdio>
 	<cstdlib>
@@ -16,7 +16,7 @@
 1269541588 source:/home/user/Projects/ASKScroller/src/main.cpp
 	"PrimaryWindow.h"
 
-1403048063 /home/user/Projects/ASKScroller/src/PrimaryWindow.h
+1403048532 /home/user/Projects/ASKScroller/src/PrimaryWindow.h
 	"AllegroStarterKit.h"
 
 1403048057 source:/home/user/Projects/ASKScroller/src/PrimaryWindow.cpp

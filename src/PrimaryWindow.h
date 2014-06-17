@@ -67,6 +67,10 @@ private:
     int ballRadius_;
     int ballColor_;
 
+    bool ballAlive_;
+    int ballRespawnTimeCounter_;
+    int ballRespawnTimeDelay_;
+
 	// your game methods here
 	void UpdatePlayerShot();
     void RenderPlayerShot();

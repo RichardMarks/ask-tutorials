@@ -94,6 +94,37 @@ void PrimaryWindow::UnloadContent()
 
 void PrimaryWindow::UpdateBall()
 {
+	// NEW - ball only updates when its alive
+
+	// if the ball is not alive
+	if (!ballAlive_)
+	{
+		// increment the respawn counter
+		ballRespawnTimeCounter_++;
+
+		// if the respawn counter has reached the respawn delay
+		if (ballRespawnTimeCounter_ == ballRespawnTimeDelay_)
+		{
+			// reset the respawn counter
+			ballRespawnTimeCounter_ = 0;
+
+			// respawn the ball:
+			// * choose a random trajectory
+			ballDX_ = (float)4+(rand()%8);
+			ballDY_ = (float)4+(rand()%8);
+
+			// * choose a new random position in the top half of the screen
+			ballX_ = (float)(ballRadius_ + rand() % (SCREEN_W - ballRadius_));
+			ballY_ = (float)(ballRadius_ + rand() % ((SCREEN_H / 2) - ballRadius_));
+
+			// * set the ball to be alive
+			ballAlive_ = true;
+		}
+
+		// exit the function
+		return;
+	}
+
 	ballX_ += ballDX_;
 	ballY_ += ballDY_;
 
@@ -112,6 +143,11 @@ void PrimaryWindow::UpdateBall()
 
 void PrimaryWindow::RenderBall()
 {
+    if (!ballAlive_)
+    {
+        return;
+    }
+
 	circlefill(_backBuffer, (int)ballX_, (int)ballY_, ballRadius_, ballColor_);
 }
 
@@ -208,6 +244,82 @@ void PrimaryWindow::UpdatePlayerShot()
 			// reset its position to the top of the player
 			playerShotX_ = playerX_ + (playerWidth_ / 2);
 			playerShotY_ = playerY_ - playerShotRadius_;
+
+			// exit the function because we don't test for
+			// collisions if its dead.
+			return;
+		}
+
+		// if the shot collides with the ball:
+		/*
+			To test the collision of the ball and the shot,
+			a simple rectangle / rectangle intersection is
+			tested. If there is an intersection, there is a
+			collision.
+
+			I chose to use rectangle / rectangle intersection
+			instead of circle/circle intersection because
+			it is much faster, and the perfect accuracy is not
+			needed for a simple demonstration.
+
+			This is a collision:
+
+			      E        F
+			      o--------o
+			A     |  B     |
+			o-----|--o     |
+			|     |  |     |
+			|     o--|-----o
+			|     G  |     H
+			o--------o
+			C        D
+
+			Shot Object Rectangle:
+
+			A: sx, sy
+			B: sx + (sr * 2), sy
+			C: sx, sy + (sr * 2)
+			D: sx + (sr * 2), sy + (sr * 2)
+
+			Ball Object Rectangle:
+
+			E: bx, by
+			F: bx + (br * 2), by
+			G: bx, by + (br * 2)
+			H: bx + (br * 2), by + (br * 2)
+		*/
+
+		// calculate the diameter of the ball and shot
+		// just once since we use this dimension multiple times
+		int ballDiameter = ballRadius_ * 2;
+		int shotDiameter = playerShotRadius_ * 2;
+
+		// use integers for testing to be simpler and faster
+		// the x/y coordinates for these objects are the centers.
+		// we need to calculate the upper-left corned of the bounding
+		// rectangle, so we just subtract the radius from the center.
+		int sx = (int)playerShotX_ - playerShotRadius_;
+		int sy = (int)playerShotY_ - playerShotRadius_;
+		int bx = (int)ballX_ - ballRadius_;
+		int by = (int)ballY_ - ballRadius_;
+
+		// if there is a collision of the shot and the ball
+		if (
+			sx + shotDiameter > bx &&
+			sx < bx + ballDiameter &&
+			sy + shotDiameter > by &&
+			sy < by + ballDiameter
+			)
+		{
+			// kill the shot
+			playerShotAlive_ = false;
+
+			// reset its position to the top of the player
+			playerShotX_ = playerX_ + (playerWidth_ / 2);
+			playerShotY_ = playerY_ - playerShotRadius_;
+
+			// kill the ball
+			ballAlive_ = false;
 		}
 	}
 }
@@ -242,6 +354,13 @@ bool PrimaryWindow::LoadContentForBall()
     // the ball starts on a random trajectory
     ballDX_ = (float)4+(rand()%8);
     ballDY_ = (float)4+(rand()%8);
+
+    // the ball starts off alive by default
+    ballAlive_ = true;
+
+    // a dead ball will respawn in roughly 1 second (30 FPS)
+    ballRespawnTimeDelay_ = 30;
+    ballRespawnTimeCounter_ = 0;
 
 	return true;
 }

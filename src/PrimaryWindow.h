@@ -77,6 +77,10 @@ private:
 	void UpdateBall();
     void RenderBall();
 
+    bool LoadContentForBall();
+    bool LoadContentForPlayer();
+    bool LoadContentForPlayerShot();
+
 
 public:
 	// the class constructor

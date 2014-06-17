@@ -67,53 +67,20 @@ void PrimaryWindow::RenderFrame()
 
 bool PrimaryWindow::LoadContent()
 {
-	// load your content here
-	// a blue ball
-    ballColor_ = makecol(0, 0, 255);
+    if (!this->LoadContentForBall())
+	{
+		return false;
+	}
 
-    // the ball has a radius of 8 pixels
-    ballRadius_ = 8;
+	if (!this->LoadContentForPlayer())
+	{
+		return false;
+	}
 
-    // the ball starts in the center of the screen
-    ballX_ = SCREEN_W / 2;
-    ballY_ = SCREEN_H / 2;
-
-    // the ball starts on a random trajectory
-    ballDX_ = (float)4+(rand()%8);
-    ballDY_ = (float)4+(rand()%8);
-
-    // the player is 32 pixels wide by 64 pixels tall
-    playerWidth_ = 32;
-    playerHeight_ = 64;
-
-    // the player is at the bottom center of the screen
-    playerX_ = SCREEN_W / 2 - playerWidth_ / 2;
-    playerY_ = SCREEN_H - playerHeight_;
-
-    // the player is green
-    playerColor_ = makecol(0, 255, 0);
-
-    // the player moves at 1/3 of its width
-    playerSpeed_ = playerWidth_ / 3;
-
-    // the shot is dead by default
-    playerShotAlive_ = false;
-
-    // the player's shots have a 4 pixel radius
-    playerShotRadius_ = 4;
-
-    // the player fires cyan shots
-    playerShotColor_ = makecol(0, 255, 255);
-
-    // position the shot at the top-center of the player's ship
-    playerShotX_ = playerX_ + (playerWidth_ / 2);
-
-    // reset its Y position to the top of the player
-    playerShotY_ = (float)(playerY_ - playerShotRadius_);
-
-    // shot velocity is set once
-    // all shots are fired at 20 pixels per frame
-    playerShotDY_ = 20.0f;
+	if (!this->LoadContentForPlayerShot())
+	{
+		return false;
+	}
 
 	return ASKWindow::LoadContent();
 }
@@ -257,4 +224,67 @@ void PrimaryWindow::RenderPlayerShot()
 	circlefill(_backBuffer,
 		(int)playerShotX_, (int)playerShotY_,
 		playerShotRadius_, playerShotColor_);
+}
+
+bool PrimaryWindow::LoadContentForBall()
+{
+    // load your content here
+	// a blue ball
+    ballColor_ = makecol(0, 0, 255);
+
+    // the ball has a radius of 8 pixels
+    ballRadius_ = 8;
+
+    // the ball starts in the center of the screen
+    ballX_ = SCREEN_W / 2;
+    ballY_ = SCREEN_H / 2;
+
+    // the ball starts on a random trajectory
+    ballDX_ = (float)4+(rand()%8);
+    ballDY_ = (float)4+(rand()%8);
+
+	return true;
+}
+
+bool PrimaryWindow::LoadContentForPlayer()
+{
+    // the player is 32 pixels wide by 64 pixels tall
+    playerWidth_ = 32;
+    playerHeight_ = 64;
+
+    // the player is at the bottom center of the screen
+    playerX_ = SCREEN_W / 2 - playerWidth_ / 2;
+    playerY_ = SCREEN_H - playerHeight_;
+
+    // the player is green
+    playerColor_ = makecol(0, 255, 0);
+
+    // the player moves at 1/3 of its width
+    playerSpeed_ = playerWidth_ / 3;
+
+	return true;
+}
+
+bool PrimaryWindow::LoadContentForPlayerShot()
+{
+    // the shot is dead by default
+    playerShotAlive_ = false;
+
+    // the player's shots have a 4 pixel radius
+    playerShotRadius_ = 4;
+
+    // the player fires cyan shots
+    playerShotColor_ = makecol(0, 255, 255);
+
+    // position the shot at the top-center of the player's ship
+    playerShotX_ = playerX_ + (playerWidth_ / 2);
+
+    // reset its Y position to the top of the player
+    playerShotY_ = (float)(playerY_ - playerShotRadius_);
+
+    // shot velocity is set once
+    // all shots are fired at 20 pixels per frame
+    playerShotDY_ = 20.0f;
+
+	return true;
 }

@@ -46,6 +46,8 @@ class PrimaryWindow : public ASKWindow
 private:
 
 	// your game variables here
+	int playerScore_;
+
 	bool playerAlive_;
     int startingPlayerLives_;
     int playerLives_;
@@ -104,6 +106,9 @@ private:
 
     void RenderHeadsUpDisplay();
     void RenderPlayerLivesIndicator();
+
+    void RenderScoreIndicator();
+    void RenderDigit(int digit, int x, int y, int width, int height, int color) const;
 
     bool LoadContentForBall();
     bool LoadContentForPlayer();

@@ -35,6 +35,7 @@
 // include the complementing header
 #include "PrimaryWindow.h"
 #include <cmath>
+#include <cstdio>
 
 PrimaryWindow::PrimaryWindow()
 {
@@ -429,6 +430,9 @@ void PrimaryWindow::UpdatePlayerShot()
 
 			// kill the ball
 			ballAlive_ = false;
+
+			// increase the player's score
+            playerScore_ += 25;
 		}
 	}
 }
@@ -503,6 +507,9 @@ bool PrimaryWindow::LoadContentForPlayer()
     // the player will take roughly 3 seconds to re-spawn
     playerRespawnTimeDelay_ = 90;
     playerRespawnTimeCounter_ = 0;
+
+    // player starts with a score of zero
+    playerScore_ = 0;
 
 	return true;
 }
@@ -693,6 +700,7 @@ void PrimaryWindow::RenderHeadsUpDisplay()
     const int hudBackColor = makecol(32, 32, 32);
     rectfill(_backBuffer, 0, SCREEN_H - 18, SCREEN_W, SCREEN_H, hudBackColor);
     this->RenderPlayerLivesIndicator();
+    this->RenderScoreIndicator();
 }
 
 void PrimaryWindow::RenderPlayerLivesIndicator()
@@ -714,4 +722,59 @@ void PrimaryWindow::RenderPlayerLivesIndicator()
             x + iconWidth, iconBottom,
             playerColor_);
     }
+}
+
+void PrimaryWindow::RenderScoreIndicator()
+{
+    const int fontWidth = 8;
+    const int fontHeight = 14;
+    const int fontSpacing = 2;
+    const int letterWidth = fontWidth + fontSpacing;
+    const int numberOfDigitsToDisplay = 8;
+    const int digitBufferSize = numberOfDigitsToDisplay + 1;
+    const int indicatorWidth = letterWidth * numberOfDigitsToDisplay;
+    const int xOffset = (SCREEN_W / 2) - (indicatorWidth / 2);
+    const int yOffset = (SCREEN_H - 18) + (9 - (fontHeight / 2));
+    const int scoreColor = makecol(255, 255, 255);
+
+    char scoreDigitBuffer[digitBufferSize];
+    snprintf(scoreDigitBuffer, digitBufferSize, "%08d", playerScore_);
+
+    for (int i = 0, xPos = xOffset; i < numberOfDigitsToDisplay; i++)
+    {
+        int digit = (int)scoreDigitBuffer[i];
+        this->RenderDigit(digit - 48, xPos, yOffset, fontWidth, fontHeight, scoreColor);
+        xPos += letterWidth;
+    }
+}
+
+void PrimaryWindow::RenderDigit(int digit, int x, int y, int width, int height, int color) const
+{
+    // A simple 7-segment digital digit rendering routine
+    // (C) Copyright 2010, Richard Marks
+    // Use in your own programs requires permission.
+    const int x2 = x + width;
+    const int y2 = y + (height / 2);
+    const int y3 = y + height;
+    const int vx[] = {x, x2, x2, x2,  x, x};
+    const int vy[] = {y,  y, y2, y3, y3, y2};
+    const int invalidDigit = 0xB;
+    const unsigned char pattern[] =
+    {
+        0x7E, 0x30, 0x6D, 0x79, 0x33,
+        0x5B, 0x5F, 0x70, 0x7F, 0x73,
+        0x00
+    };
+
+    if (digit < 0 || digit > 9)
+    {
+        digit = invalidDigit;
+    }
+    if (pattern[digit] & 0x40) { line(_backBuffer, vx[0], vy[0], vx[1], vy[1], color); }
+    if (pattern[digit] & 0x20) { line(_backBuffer, vx[1], vy[1], vx[2], vy[2], color); }
+    if (pattern[digit] & 0x10) { line(_backBuffer, vx[2], vy[2], vx[3], vy[3], color); }
+    if (pattern[digit] & 0x08) { line(_backBuffer, vx[3], vy[3], vx[4], vy[4], color); }
+    if (pattern[digit] & 0x04) { line(_backBuffer, vx[4], vy[4], vx[5], vy[5], color); }
+    if (pattern[digit] & 0x02) { line(_backBuffer, vx[5], vy[5], vx[0], vy[0], color); }
+    if (pattern[digit] & 0x01) { line(_backBuffer, vx[5], vy[5], vx[2], vy[2], color); }
 }

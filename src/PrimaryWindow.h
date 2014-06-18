@@ -102,10 +102,15 @@ private:
     void UpdateBallShot();
     void RenderBallShot();
 
+    void RenderHeadsUpDisplay();
+    void RenderPlayerLivesIndicator();
+
     bool LoadContentForBall();
     bool LoadContentForPlayer();
     bool LoadContentForPlayerShot();
     bool LoadContentForBallShot();
+
+
 
 
 public:

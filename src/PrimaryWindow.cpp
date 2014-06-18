@@ -64,6 +64,7 @@ void PrimaryWindow::RenderFrame()
 	this->RenderBallShot();
 	this->RenderPlayer();
 	this->RenderPlayerShot();
+	this->RenderHeadsUpDisplay();
 
 
 	ASKWindow::RenderFrame();
@@ -632,4 +633,32 @@ bool PrimaryWindow::LoadContentForBallShot()
     ballShotDY_ = 0.0f;
 
     return true;
+}
+
+void PrimaryWindow::RenderHeadsUpDisplay()
+{
+    const int hudBackColor = makecol(32, 32, 32);
+    rectfill(_backBuffer, 0, SCREEN_H - 18, SCREEN_W, SCREEN_H, hudBackColor);
+    this->RenderPlayerLivesIndicator();
+}
+
+void PrimaryWindow::RenderPlayerLivesIndicator()
+{
+    int xOffset = 8;
+    int yOffset = SCREEN_H - 18;
+    int iconWidth = 8;
+    int iconWidthOver2 = iconWidth / 2;
+    int iconHeight = 16;
+    int iconSpacing = 4;
+    int iconBottom = yOffset + iconHeight;
+
+    for (int i = 0; i < playerLives_; i++)
+    {
+        int x = xOffset + ((i * iconWidth) + (i * iconSpacing));
+        triangle(_backBuffer,
+            x, iconBottom,
+            x + iconWidthOver2, yOffset,
+            x + iconWidth, iconBottom,
+            playerColor_);
+    }
 }

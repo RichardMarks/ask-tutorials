@@ -34,6 +34,7 @@
 
 // include the complementing header
 #include "PrimaryWindow.h"
+#include <cmath>
 
 PrimaryWindow::PrimaryWindow()
 {
@@ -47,6 +48,7 @@ bool PrimaryWindow::UpdateFrame()
 {
 	// update stuff here
 	this->UpdateBall();
+	this->UpdateBallShot();
 	this->UpdatePlayer();
 	this->UpdatePlayerShot();
 
@@ -59,8 +61,10 @@ void PrimaryWindow::RenderFrame()
 
 	// draw here
 	this->RenderBall();
+	this->RenderBallShot();
 	this->RenderPlayer();
 	this->RenderPlayerShot();
+
 
 	ASKWindow::RenderFrame();
 }
@@ -68,6 +72,11 @@ void PrimaryWindow::RenderFrame()
 bool PrimaryWindow::LoadContent()
 {
     if (!this->LoadContentForBall())
+	{
+		return false;
+	}
+
+	if (!this->LoadContentForBallShot())
 	{
 		return false;
 	}
@@ -134,11 +143,53 @@ void PrimaryWindow::UpdateBall()
 		ballX_ += ballDX_;
 	}
 
-	if (ballY_ < ballRadius_ || ballY_ > (SCREEN_H - ballRadius_))
+	if (ballY_ < ballRadius_ || ballY_ > ((SCREEN_H - 18) - ballRadius_))
 	{
 		ballDY_ = ballDY_ * -1.0f;
 		ballY_ += ballDY_;
 	}
+
+	// can fire only if the ball shot is dead
+    if (ballShotAlive_)
+    {
+        // exit the function
+        return;
+    }
+
+    // randomly attack the player
+    if ((rand() % 8) != 0)
+    {
+        // exit the function
+        return;
+    }
+
+    // if the ball is not traveling downwards,
+    if (ballDY_ <= 0.0f)
+    {
+        // exit the function
+        return;
+    }
+
+    // if the ball has passed the Y centerline
+    if (ballY_ > SCREEN_H / 2)
+    {
+        // exit the function
+        return;
+    }
+
+    // calculate the trajectory to the player
+    float dx = playerX_ - ballX_;
+    float dy = playerY_ - ballY_;
+
+    float length = sqrt((dx * dx) + (dy * dy));
+
+    dx /= length;
+    dy /= length;
+
+    ballShotDX_ = dx * ballShotSpeed_;
+    ballShotDY_ = dy * ballShotSpeed_;
+
+    ballShotAlive_ = true;
 }
 
 void PrimaryWindow::RenderBall()
@@ -406,4 +457,108 @@ bool PrimaryWindow::LoadContentForPlayerShot()
     playerShotDY_ = 20.0f;
 
 	return true;
+}
+
+void PrimaryWindow::UpdateBallShot()
+{
+    // if the shot is not alive, move it's position to the ball
+    if (!ballShotAlive_)
+    {
+        ballShotX_ = ballX_;
+        ballShotY_ = ballY_;
+        return;
+    }
+
+    // toggle the display
+    ballShotShow_ = !ballShotShow_;
+
+    #if 0
+	// 10% chance to track player for lock-on missile behavior
+	if (rand() % 100 < 10)
+    {
+        // calculate the trajectory to the player
+        float dx = playerX_ - ballShotX_;
+        float dy = playerY_ - ballShotY_;
+
+        float length = sqrt((dx * dx) + (dy * dy));
+
+        dx /= length;
+        dy /= length;
+
+        ballShotDX_ = dx * ballShotSpeed_;
+        ballShotDY_ = dy * ballShotSpeed_;
+    }
+    #endif
+
+    // apply velocity
+    ballShotX_ += ballShotDX_;
+    ballShotY_ += ballShotDY_;
+
+    // if the shot goes off screen
+    if (ballShotX_ < 0 || ballShotY_ > SCREEN_H || ballShotX_ > SCREEN_W)
+    {
+        // kill the shot
+        ballShotAlive_ = false;
+
+        // reset the position to the ball
+        ballShotX_ = ballX_;
+        ballShotY_ = ballY_;
+
+        // exit the function
+        return;
+    }
+}
+
+void PrimaryWindow::RenderBallShot()
+{
+    // exit the function if the shot is dead
+    if (!ballShotAlive_)
+    {
+        return;
+    }
+
+    // draw the shot
+    if (!ballShotShow_)
+    {
+        circlefill(_backBuffer,
+        (int)ballShotX_, (int)ballShotY_,
+        ballShotRadius_, ballShotColor_);
+    }
+    else
+    {
+        circlefill(_backBuffer,
+        (int)ballShotX_, (int)ballShotY_,
+        ballShotRadius2_, ballShotColor_);
+    }
+}
+
+bool PrimaryWindow::LoadContentForBallShot()
+{
+    // the shot is dead by default
+    ballShotAlive_ = false;
+
+    // the ball's shots will alternate between 2 sizes
+    ballShotRadius_ = 4;
+    ballShotRadius2_ = 5;
+
+    // the ball fires a red to yellow shot
+    ballShotColor_ = makecol(255, 0, 0);
+    ballShotColor2_ = makecol(255, 255, 0);
+
+    // position the shot at the center of the ball
+    ballShotX_ = ballX_;
+    ballShotY_ = ballY_;
+
+    // ball shots move at 15 pixels per frame
+    ballShotSpeed_ = 15.0f;
+
+    // the shot has 2 displays, and we use a
+    // boolean to decide which display to render
+    ballShotShow_ = true;
+
+    // shots trajectory will be calculated when firing
+    ballShotDX_ = 0.0f;
+    ballShotDY_ = 0.0f;
+
+    return true;
 }

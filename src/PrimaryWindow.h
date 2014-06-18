@@ -71,6 +71,18 @@ private:
     int ballRespawnTimeCounter_;
     int ballRespawnTimeDelay_;
 
+    bool ballShotAlive_;
+    bool ballShotShow_;
+    float ballShotSpeed_;
+    float ballShotX_;
+    float ballShotY_;
+    float ballShotDX_;
+    float ballShotDY_;
+    int ballShotRadius_;
+    int ballShotRadius2_;
+    int ballShotColor_;
+    int ballShotColor2_;
+
 	// your game methods here
 	void UpdatePlayerShot();
     void RenderPlayerShot();
@@ -81,9 +93,13 @@ private:
 	void UpdateBall();
     void RenderBall();
 
+    void UpdateBallShot();
+    void RenderBallShot();
+
     bool LoadContentForBall();
     bool LoadContentForPlayer();
     bool LoadContentForPlayerShot();
+    bool LoadContentForBallShot();
 
 
 public:

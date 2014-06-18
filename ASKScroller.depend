@@ -16,10 +16,10 @@
 1269541588 source:/home/user/Projects/ASKScroller/src/main.cpp
 	"PrimaryWindow.h"
 
-1403049701 /home/user/Projects/ASKScroller/src/PrimaryWindow.h
+1403051567 /home/user/Projects/ASKScroller/src/PrimaryWindow.h
 	"AllegroStarterKit.h"
 
-1403050285 source:/home/user/Projects/ASKScroller/src/PrimaryWindow.cpp
+1403051192 source:/home/user/Projects/ASKScroller/src/PrimaryWindow.cpp
 	"PrimaryWindow.h"
 	<cmath>
 

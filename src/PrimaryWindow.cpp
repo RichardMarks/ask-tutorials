@@ -149,6 +149,13 @@ void PrimaryWindow::UpdateBall()
 		ballY_ += ballDY_;
 	}
 
+    // is the player even alive?
+    if (!playerAlive_)
+    {
+        // exit the function
+        return;
+    }
+
 	// can fire only if the ball shot is dead
     if (ballShotAlive_)
     {
@@ -204,6 +211,41 @@ void PrimaryWindow::RenderBall()
 
 void PrimaryWindow::UpdatePlayer()
 {
+    // if the player is dead
+    if (!playerAlive_)
+    {
+        // if the player has no lives remaining
+        if (!playerLives_)
+        {
+            // end the program for now.
+            // We will add game over screens and menus in later tutorials.
+            this->Close();
+
+            // exit the function
+            return;
+        }
+
+        // increment the respawn counter
+        playerRespawnTimeCounter_++;
+
+        // if the respawn counter has reached the respawn delay
+        if (playerRespawnTimeCounter_ == playerRespawnTimeDelay_)
+        {
+            // reset the respawn counter
+            playerRespawnTimeCounter_ = 0;
+
+            // respawn the player:
+            playerX_ = SCREEN_W / 2 - playerWidth_ / 2;
+            playerY_ = (SCREEN_H - 20) - playerHeight_;
+
+            // set the player to be alive
+            playerAlive_ = true;
+        }
+
+        // exit the function
+        return;
+    }
+
 	// if the left arrow key is down
 	if (key[KEY_LEFT])
 	{
@@ -267,10 +309,25 @@ void PrimaryWindow::RenderPlayer()
 	// that reduces the number of calculations needed.
 	int playerBottom = playerY_ + playerHeight_;
 
-	triangle(_backBuffer,
-		playerX_, playerBottom,
-		playerX_ + (playerWidth_ / 2), playerY_,
-		playerX_ + playerWidth_, playerBottom, playerColor_);
+	int vx[] = { playerX_, playerX_ + (playerWidth_ / 2), playerX_ + playerWidth_ };
+    int vy[] = { playerBottom, playerY_, playerBottom };
+
+    if (!playerAlive_)
+    {
+        // wireframe display flashes
+        if ((playerRespawnTimeCounter_ % 2) == 0)
+        {
+            line(_backBuffer, vx[0], vy[0], vx[1], vy[1], playerColor_);
+            line(_backBuffer, vx[1], vy[1], vx[2], vy[2], playerColor_);
+            line(_backBuffer, vx[2], vy[2], vx[0], vy[0], playerColor_);
+        }
+
+        // exit the function
+        return;
+    }
+
+    // we draw the player as a filled triangle
+    triangle(_backBuffer, vx[0], vy[0], vx[1], vy[1], vx[2], vy[2], playerColor_);
 }
 
 void PrimaryWindow::UpdatePlayerShot()
@@ -424,13 +481,27 @@ bool PrimaryWindow::LoadContentForPlayer()
 
     // the player is at the bottom center of the screen
     playerX_ = SCREEN_W / 2 - playerWidth_ / 2;
-    playerY_ = SCREEN_H - playerHeight_;
+    playerY_ = (SCREEN_H - 20) - playerHeight_;
 
     // the player is green
     playerColor_ = makecol(0, 255, 0);
 
     // the player moves at 1/3 of its width
     playerSpeed_ = playerWidth_ / 3;
+
+    // the player starts the game in a dead state
+    // this gives the player a few seconds before the action begins.
+    playerAlive_ = false;
+
+    // the player will start with 5 lives
+    startingPlayerLives_ = 5;
+
+    // set the player with the right number of lives
+    playerLives_ = startingPlayerLives_;
+
+    // the player will take roughly 3 seconds to re-spawn
+    playerRespawnTimeDelay_ = 90;
+    playerRespawnTimeCounter_ = 0;
 
 	return true;
 }

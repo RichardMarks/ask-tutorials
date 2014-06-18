@@ -46,6 +46,12 @@ class PrimaryWindow : public ASKWindow
 private:
 
 	// your game variables here
+	bool playerAlive_;
+    int startingPlayerLives_;
+    int playerLives_;
+    int playerRespawnTimeDelay_;
+    int playerRespawnTimeCounter_;
+
 	bool playerShotAlive_;
     float playerShotX_;
     float playerShotY_;

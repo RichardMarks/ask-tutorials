@@ -579,6 +579,59 @@ void PrimaryWindow::UpdateBallShot()
         // exit the function
         return;
     }
+
+    // handle collision against the player
+    /*
+        We are going to use a point/triangle intersection test this time.
+
+        Warning: The following code is convoluted and difficult to understand.
+        I didn't write the algorithm. I found it somewhere a long time ago.
+        I do not remember the source, so I credit it as (C) Original Author.
+
+        Just use it, and know that if the inside boolean is true after the code
+        executes, that there has been a collision.
+
+        The input variables are: x,y, vx1, vy1, vx2, vy2, vx3, vy3
+
+        x - the x coordinate of the point to test
+        y - the y coordinate of the point to test
+        vxN - the x coordinate for the vertice N of the triangle
+        vyN - the y coordinate for the vertice N of the triangle
+    */
+
+    // the player's triangle
+    int playerBottom = playerY_ + playerHeight_;
+    float vx1 = (float)playerX_;
+    float vy1 = (float)playerBottom;
+    float vx2 = (float)(playerX_ + (playerWidth_ / 2));
+    float vy2 = (float)playerY_;
+    float vx3 = (float)(playerX_ + playerWidth_);
+    float vy3 = vy1;
+
+    // the point is the shot's center (its position)
+    float& x = ballShotX_;
+    float& y = ballShotY_;
+
+    // test if the point is within the triangle
+    bool inside = false;
+    if((((vy1<=y)&&(y<vy3))||((vy3<=y)&&(y<vy1)))&&(x<(vx3-vx1)*(y-vy1)/(vy3-vy1)+vx1)){inside=!inside;}
+    if((((vy2<=y)&&(y<vy1))||((vy1<=y)&&(y<vy2)))&&(x<(vx1-vx2)*(y-vy2)/(vy1-vy2)+vx2)){inside=!inside;}
+    if((((vy3<=y)&&(y<vy2))||((vy2<=y)&&(y<vy3)))&&(x<(vx2-vx3)*(y-vy3)/(vy2-vy3)+vx3)){inside=!inside;}
+    if (inside)
+    {
+        // kill the shot
+        ballShotAlive_ = false;
+
+        // reset the position to the ball
+        ballShotX_ = ballX_;
+        ballShotY_ = ballY_;
+
+        // kill the player! Oh Noooo
+        playerAlive_ = false;
+
+        // decrease the number of lives the player has
+        playerLives_--;
+    }
 }
 
 void PrimaryWindow::RenderBallShot()
